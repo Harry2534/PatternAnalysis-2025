@@ -1,0 +1,5 @@
+# Ignore all CSV files in OASIS
+OASIS/*.png
+
+# Ignore all .log files
+*.log
