@@ -1,29 +1,42 @@
-# evaluate.py
 import torch
+from modules import ImprovedUNet
+from dataset import OASISDataset
+import matplotlib.pyplot as plt
+import os
+from torchvision import transforms
+from PIL import Image
 import numpy as np
-from modules_unet2d import ImprovedUNet
-from dataset_oasis import OASISDataset
 
-def dice_coef(pred, target, eps=1e-6):
-    pred = torch.argmax(pred, dim=1)
-    intersection = (pred * target).sum()
-    return (2. * intersection + eps) / (pred.sum() + target.sum() + eps)
-
-model = ImprovedUNet(in_channels=1, out_channels=3)
-model.load_state_dict(torch.load("unet_oasis.pth", map_location="cpu"))
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model = ImprovedUNet(n_channels=1, n_classes=4).to(device)  # <- 4 classes
+model.load_state_dict(torch.load("saved_models/improved_unet.pth", map_location=device))
 model.eval()
 
-# Update these paths as needed; keep raw strings on Windows to avoid unicode issues
-dataset = OASISDataset(
-    r"c:\Users\hpara\PatternAnalysis-2025\OASIS\keras_png_slices_test",
-    r"c:\Users\hpara\PatternAnalysis-2025\OASIS\keras_png_slices_train"
-)
+# Example single image
+img_path = "OASIS/-keras_png_slices_test/case_001_slice_0.nii.png"
+mask_path = "OASIS/-keras_png_slices_seg_test/seg_001_slice_0.nii.png"
 
-total_dice = 0
-for i in range(min(10, len(dataset))):  # sample 10 test images
-    img, mask = dataset[i]
-    with torch.no_grad():
-        pred = model(img.unsqueeze(0))
-    dice = dice_coef(pred, mask)
-    total_dice += dice.item()
-print(f"Average Dice coefficient: {total_dice/ max(1, min(10, len(dataset))):.3f}")
+transform = transforms.Compose([
+    transforms.ToTensor(),
+    transforms.Normalize([0.5], [0.5])
+])
+
+image = Image.open(img_path).convert('L')
+mask = Image.open(mask_path).convert('L')
+input_tensor = transform(image).unsqueeze(0).to(device)
+
+with torch.no_grad():
+    output = model(input_tensor)
+    pred = torch.argmax(output, dim=1).cpu().squeeze().numpy()
+
+plt.figure(figsize=(12,4))
+plt.subplot(1,3,1)
+plt.imshow(image, cmap='gray')
+plt.title("Input Image")
+plt.subplot(1,3,2)
+plt.imshow(mask, cmap='gray')
+plt.title("Ground Truth")
+plt.subplot(1,3,3)
+plt.imshow(pred, cmap='gray')
+plt.title("Predicted Mask")
+plt.show()

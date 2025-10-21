@@ -1,60 +1,78 @@
-# train_oasis.py
 import torch
-from torch import nn, optim
-from torch.utils.data import DataLoader, random_split
-from modules_unet2d import ImprovedUNet
-from dataset_oasis import OASISDataset
+import torch.nn as nn
+import torch.optim as optim
+from modules import ImprovedUNet
+from dataset import get_loaders
 import matplotlib.pyplot as plt
 import os
 
+# Paths (update with actual OASIS paths)
+train_img_dir = "OASIS_test/keras_png_slices_train"
+train_mask_dir = "OASIS_test/keras_png_slices_seg_train"
+val_img_dir = "OASIS_test/keras_png_slices_validate"
+val_mask_dir = "OASIS_test/keras_png_slices_seg_validate"
+
 device = "cuda" if torch.cuda.is_available() else "cpu"
-
-# Load dataset
-dataset = OASISDataset(
-    r"c:\Users\hpara\PatternAnalysis-2025\OASIS\keras_png_slices_test",         # images
-    r"c:\Users\hpara\PatternAnalysis-2025\OASIS\keras_png_slices_train"         # labels
-)
-train_size = int(0.8 * len(dataset))
-val_size = len(dataset) - train_size
-train_set, val_set = random_split(dataset, [train_size, val_size])
-
-train_loader = DataLoader(train_set, batch_size=8, shuffle=True)
-val_loader = DataLoader(val_set, batch_size=8)
-
-model = ImprovedUNet(in_channels=1, out_channels=3).to(device)
+NUM_CLASSES = 4  # <- masks have classes {0,1,2,3}
+model = ImprovedUNet(n_channels=1, n_classes=NUM_CLASSES).to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=1e-4)
+train_loader, val_loader = get_loaders(train_img_dir, train_mask_dir, val_img_dir, val_mask_dir, batch_size=4)
 
-train_losses, val_losses = [], []
+def dice_coefficient(logits, targets, num_classes=4, epsilon=1e-6):
+	# Multiclass Dice: average per-class Dice between argmax(logits) and targets
+	preds = torch.argmax(logits, dim=1)
+	dice = 0.0
+	for c in range(num_classes):
+		p = (preds == c).float()
+		t = (targets == c).float()
+		intersection = (p * t).sum()
+		union = p.sum() + t.sum()
+		dice += (2 * intersection + epsilon) / (union + epsilon)
+	return dice / num_classes
 
-for epoch in range(15):
+num_epochs = 20
+train_losses, val_losses, val_dices = [], [], []
+
+for epoch in range(num_epochs):
     model.train()
-    total_loss = 0
-    for imgs, labels in train_loader:
-        imgs, labels = imgs.to(device), labels.to(device)
+    running_loss = 0
+    for images, masks in train_loader:
+        images, masks = images.to(device), masks.to(device)
         optimizer.zero_grad()
-        outputs = model(imgs)
-        loss = criterion(outputs, labels)
+        outputs = model(images)
+        loss = criterion(outputs, masks)
         loss.backward()
         optimizer.step()
-        total_loss += loss.item()
-    avg_train_loss = total_loss / len(train_loader)
-    train_losses.append(avg_train_loss)
-
-    # Validation
+        running_loss += loss.item()
+    train_losses.append(running_loss / len(train_loader))
+    
     model.eval()
+    val_loss = 0
+    dice_score = 0
     with torch.no_grad():
-        val_loss = sum(criterion(model(x.to(device)), y.to(device)).item() for x, y in val_loader)
+        for images, masks in val_loader:
+            images, masks = images.to(device), masks.to(device)
+            outputs = model(images)
+            loss = criterion(outputs, masks)
+            val_loss += loss.item()
+            dice_score += dice_coefficient(outputs, masks, num_classes=NUM_CLASSES).item()
     val_losses.append(val_loss / len(val_loader))
+    val_dices.append(dice_score / len(val_loader))
+    
+    print(f"Epoch {epoch+1}/{num_epochs}, Train Loss: {train_losses[-1]:.4f}, Val Loss: {val_losses[-1]:.4f}, Dice: {val_dices[-1]:.4f}")
 
-    print(f"Epoch {epoch+1}: Train Loss = {avg_train_loss:.4f}, Val Loss = {val_losses[-1]:.4f}")
+# Save model
+os.makedirs("saved_models", exist_ok=True)
+torch.save(model.state_dict(), "saved_models/improved_unet.pth")
 
-torch.save(model.state_dict(), "unet_oasis.pth")
-
-plt.plot(train_losses, label="Train")
-plt.plot(val_losses, label="Val")
+# Plot losses and Dice
+plt.figure(figsize=(10,4))
+plt.subplot(1,2,1)
+plt.plot(train_losses, label="Train Loss")
+plt.plot(val_losses, label="Val Loss")
 plt.legend()
-plt.title("Training Loss")
-plt.xlabel("Epoch")
-plt.ylabel("Loss")
-plt.savefig("loss_curve.png")
+plt.subplot(1,2,2)
+plt.plot(val_dices, label="Validation Dice")
+plt.legend()
+plt.show()
