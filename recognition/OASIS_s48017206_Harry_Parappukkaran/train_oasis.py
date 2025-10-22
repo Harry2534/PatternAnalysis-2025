@@ -12,7 +12,7 @@ train_mask_dir = "OASIS_test/keras_png_slices_seg_train"
 val_img_dir = "OASIS_test/keras_png_slices_validate"
 val_mask_dir = "OASIS_test/keras_png_slices_seg_validate"
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
+device = "cu:da" if torch.cuda.is_available() else "cpu"
 NUM_CLASSES = 4  # <- masks have classes {0,1,2,3}
 model = ImprovedUNet(n_channels=1, n_classes=NUM_CLASSES).to(device)
 criterion = nn.CrossEntropyLoss()
