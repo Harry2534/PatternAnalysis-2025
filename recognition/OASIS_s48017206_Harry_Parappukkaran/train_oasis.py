@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 import os
 
 # Paths (update with actual OASIS paths)
-train_img_dir = "OASIS_test/keras_png_slices_train"
-train_mask_dir = "OASIS_test/keras_png_slices_seg_train"
-val_img_dir = "OASIS_test/keras_png_slices_validate"
-val_mask_dir = "OASIS_test/keras_png_slices_seg_validate"
+train_img_dir = "OASIS/keras_png_slices_train"
+train_mask_dir = "OASIS/keras_png_slices_seg_train"
+val_img_dir = "OASIS/keras_png_slices_validate"
+val_mask_dir = "OASIS/keras_png_slices_seg_validate"
 
 device = "cu:da" if torch.cuda.is_available() else "cpu"
 NUM_CLASSES = 4  # <- masks have classes {0,1,2,3}
