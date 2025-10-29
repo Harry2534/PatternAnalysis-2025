@@ -1,0 +1,20 @@
+Case 441: Dice=0.9322
+Case 442: Dice=0.9602
+Case 443: Dice=0.9788
+Case 444: Dice=0.9649
+Case 445: Dice=0.9838
+Case 446: Dice=0.9818
+Case 447: Dice=0.9689
+Case 448: Dice=0.9275
+Case 449: Dice=0.9588
+Case 450: Dice=0.7565
+Case 451: Dice=0.9743
+Case 452: Dice=0.9802
+Case 453: Dice=0.9771
+Case 454: Dice=0.9688
+Case 455: Dice=0.9654
+Case 456: Dice=0.9635
+Case 457: Dice=0.9817
+Evaluated 17 cases.
+Mean Dice: 0.9544
+/var/slurm/d/job320586/slurm_script: line 16: /home/Student/s4801720: Is a directory
