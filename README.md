@@ -3,13 +3,10 @@ This project implements a 3D brain MRI segmentation pipeline using an enhanced U
 
 # Table of Contents
 - Project Overview
-- Installation
 - Dataset
 - Method / Model Description
 - Evaluation & Results
-- Results
-- File Structure
-- Usage
+- Conclusion
 
 # Project Overview
 The segmentation pipeline includes:
@@ -18,16 +15,6 @@ The segmentation pipeline includes:
 - Training: Uses CrossEntropyLoss with Dice coefficient evaluation.
 - Prediction & Evaluation: Computes per-case Dice scores and mean Dice across test cases.
 The goal is to achieve accurate and efficient 3D volumetric brain structure segmentation.
-
-# Installation
-```
-Clone the repository
-git clone <your-repo-url>
-cd PatternAnalysis-2025/recognition
-
-Install dependencies
-pip install torch torchvision numpy pillow matplotlib
-```
 
 # Dataset
 The project uses the OASIS MRI dataset, organized as 3D volumes reconstructed from 2D PNG slices:
@@ -128,7 +115,6 @@ Summary:
 These results indicate strong generalisation to unseen volumes, with consistent Dice scores above 0.93 across most cases.
 
 ## Visual Results (Optional Plots)
-
 <img width="1920" height="1440" alt="val_dice_curve" src="https://github.com/user-attachments/assets/f374ad70-aaf6-4e91-8faa-d76ffa3a97fa" />
 <img width="1920" height="1440" alt="train_loss_curve" src="https://github.com/user-attachments/assets/8e0b3edc-2330-47b8-ad52-32932291ca33" />
 
