@@ -117,16 +117,18 @@ These results indicate strong generalisation to unseen volumes, with consistent 
 ## Visual Results (Optional Plots)
 ### Training Loss Curve
 <img width="1920" height="1440" alt="train_loss_curve" src="https://github.com/user-attachments/assets/8e0b3edc-2330-47b8-ad52-32932291ca33" />
+#### Analysis
 The Training Loss steadily decreases over the 100 epochs, starting at 0.8695 in Epoch 1 and dropping to 0.0124 by Epoch 100. This indicates that the model is successfully learning from the training data, with the loss approaching a very low value, which suggests that the network has effectively minimized prediction errors on the training set.
-Key observations:
+##### Key observations:
 - Rapid decrease in the first ~20 epochs indicates fast convergence initially.
 - Minor fluctuations after epoch 60 suggest the model is refining its learning.
 - The consistent downward trend confirms that the model is not stagnating early.
 
 ### Validation Dice Curve
 <img width="1920" height="1440" alt="val_dice_curve" src="https://github.com/user-attachments/assets/f374ad70-aaf6-4e91-8faa-d76ffa3a97fa" />
+#### Analysis
 The Validation Dice coefficient starts around 0.8894 and increases to 0.9694 by the final epoch. The Dice coefficient is a measure of segmentation quality (higher is better), so this indicates that the model is effectively generalizing to unseen data.
-Key observations:
+##### Key observations:
 - The Dice curve shows steady improvement alongside the training loss, indicating good learning dynamics.
 - Minor dips (e.g., Epoch 59: Dice=0.9031) suggest occasional sensitivity to specific batches but overall stability is maintained.
 - Achieving a mean Dice of 0.9544 across evaluated cases demonstrates high segmentation accuracy and consistency.
