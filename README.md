@@ -152,10 +152,6 @@ Future work could explore:
   - Attention-based UNets
   - Transfer learning on larger MRI datasets (e.g., BraTS)
 
-# References
-1. Çiçek et al., "3D U-Net: Learning Dense Volumetric Segmentation from Sparse Annotation", MICCAI 2016.
-2. OASIS-1 MRI Dataset: https://www.oasis-brains.org/
-3. PyTorch UNet implementations adapted and extended from open-source repositories.
 
 
 
